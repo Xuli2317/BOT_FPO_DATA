@@ -2,8 +2,8 @@ name: Run BOT and Upload to Drive
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "* * * * *"
+  # schedule:
+  #   - cron: "* * * * *"
 
 jobs:
   run:
@@ -18,7 +18,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: python main.py
+      - run: jupyter nbconvert --to notebook --execute BOT_FPO_DATA.ipynb --output executed.ipynb
 
       - run: python upload_to_drive.py
         env:
