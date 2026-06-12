@@ -36,11 +36,7 @@ def upload_file(local_path, drive_name=None):
     print(f"Uploaded {drive_name}: {result['id']}")
 
 
-for folder in ["data", "FPO", "BOT"]:
-    if not os.path.exists(folder):
-        continue
-
-    for root, dirs, files in os.walk(folder):
-        for filename in files:
-            local_path = os.path.join(root, filename)
-            upload_file(local_path)
+for root, dirs, files in os.walk("SENTIMENT_INDEX"):
+    for filename in files:
+        local_path = os.path.join(root, filename)
+        upload_file(local_path)
