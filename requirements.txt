@@ -2,5 +2,9 @@ pandas
 requests
 pyarrow
 openpyxl
+beautifulsoup4
+notebook
+nbconvert
+jupyter
 google-api-python-client
 google-auth
