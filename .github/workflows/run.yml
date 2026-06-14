@@ -3,7 +3,7 @@ name: Run BOT and Upload to Drive
 on:
   workflow_dispatch:
   schedule:
-    - cron: "00 2 * * *"
+    - cron: "0 19 * * *"
 
 jobs:
   run:
