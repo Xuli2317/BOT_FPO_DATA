@@ -3,8 +3,8 @@ name: Run BOT FPO and Upload to Drive
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * *"
-    - cron: "20 7 * * *" 
+    - cron: "0 3 * * *"  # 10:00 ไทย
+    - cron: "0 7 * * *"  # 14:00 ไทย
 
 jobs:
   run:
@@ -17,16 +17,15 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt notebook nbconvert jupyter
 
       - name: Run BOT
-        run: python BOT_DATA.py
+        run: python -m jupyter nbconvert --to notebook --execute BOT_DATA_git_ver.ipynb --output executed_bot.ipynb
         env:
           TOKEN: ${{ secrets.TOKEN }}
 
       - name: Run FPO
-        run: python FPO_DATA.py
+        run: python -m jupyter nbconvert --to notebook --execute FPO_DATA_git_ver.ipynb --output executed_fpo.ipynb
 
       - name: Upload to Google Drive
         run: python upload_to_drive.py
