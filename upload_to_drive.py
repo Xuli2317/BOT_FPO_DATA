@@ -8,6 +8,12 @@ ROOT_LOCAL = "SENTIMENT_INDEX"
 FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
 TOKEN_JSON = os.getenv("GOOGLE_OAUTH_TOKEN_JSON")
 
+if not FOLDER_ID:
+    raise ValueError("Missing GOOGLE_DRIVE_FOLDER_ID")
+
+if not TOKEN_JSON:
+    raise ValueError("Missing GOOGLE_OAUTH_TOKEN_JSON")
+
 creds = Credentials.from_authorized_user_info(
     json.loads(TOKEN_JSON),
     scopes=["https://www.googleapis.com/auth/drive"]
@@ -22,30 +28,40 @@ def esc(s):
     return s.replace("\\", "\\\\").replace("'", "\\'")
 
 
-def get_or_create_folder(name, parent_id):
-    key = (parent_id, name)
-
-    if key in folder_cache:
-        return folder_cache[key]
-
+def find_folder_in_parent(name, parent_id):
     query = (
         f"name = '{esc(name)}' and "
         f"mimeType = 'application/vnd.google-apps.folder' and "
+        f"'{parent_id}' in parents and "
         f"trashed = false"
     )
 
     res = drive.files().list(
         q=query,
         spaces="drive",
-        corpora="user",
         fields="files(id, name, parents)"
     ).execute()
 
-    for f in res.get("files", []):
-        if parent_id in f.get("parents", []):
-            folder_cache[key] = f["id"]
-            print(f"Using existing folder: {name}")
-            return f["id"]
+    files = res.get("files", [])
+
+    if len(files) > 1:
+        print(f"WARNING: duplicate folder name found: {name}, using first one")
+
+    return files[0]["id"] if files else None
+
+
+def get_or_create_folder(name, parent_id):
+    key = (parent_id, name)
+
+    if key in folder_cache:
+        return folder_cache[key]
+
+    folder_id = find_folder_in_parent(name, parent_id)
+
+    if folder_id:
+        print(f"Using existing folder: {name}")
+        folder_cache[key] = folder_id
+        return folder_id
 
     metadata = {
         "name": name,
@@ -78,7 +94,7 @@ def get_drive_folder_for_path(local_dir):
     return current_parent
 
 
-def find_existing_file(filename, parent_id):
+def find_file_in_parent(filename, parent_id):
     query = (
         f"name = '{esc(filename)}' and "
         f"'{parent_id}' in parents and "
@@ -89,11 +105,14 @@ def find_existing_file(filename, parent_id):
     res = drive.files().list(
         q=query,
         spaces="drive",
-        corpora="user",
-        fields="files(id, name)"
+        fields="files(id, name, parents)"
     ).execute()
 
     files = res.get("files", [])
+
+    if len(files) > 1:
+        print(f"WARNING: duplicate file name found: {filename}, updating first one")
+
     return files[0]["id"] if files else None
 
 
@@ -102,12 +121,11 @@ def upload_or_update_file(local_path):
     parent_id = get_drive_folder_for_path(os.path.dirname(local_path))
 
     media = MediaFileUpload(local_path, resumable=True)
+    file_id = find_file_in_parent(filename, parent_id)
 
-    existing_file_id = find_existing_file(filename, parent_id)
-
-    if existing_file_id:
+    if file_id:
         result = drive.files().update(
-            fileId=existing_file_id,
+            fileId=file_id,
             media_body=media,
             fields="id"
         ).execute()
