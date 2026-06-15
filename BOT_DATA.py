@@ -332,7 +332,7 @@
       },
       "outputs": [],
       "source": [
-        "MAX_SERIES = 1000\n",
+        "MAX_SERIES = 5\n",
         "\n",
         "df_todo = (\n",
         "    df_series[\n",
