@@ -20,12 +20,12 @@ jobs:
       - run: pip install -r requirements.txt notebook nbconvert jupyter
 
       - name: Run BOT
-        run: python -m jupyter nbconvert --to notebook --execute BOT_DATA_git_ver.ipynb --output executed_bot.ipynb
+        run: python -m jupyter nbconvert --to notebook --execute BOT_DATA.ipynb --output executed_bot.ipynb
         env:
           TOKEN: ${{ secrets.TOKEN }}
 
       - name: Run FPO
-        run: python -m jupyter nbconvert --to notebook --execute FPO_DATA_git_ver.ipynb --output executed_fpo.ipynb
+        run: python -m jupyter nbconvert --to notebook --execute FPO_DATA.ipynb --output executed_fpo.ipynb
 
       - name: Upload to Google Drive
         run: python upload_to_drive.py
