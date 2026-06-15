@@ -1,15 +1,15 @@
 import os
 import json
-from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
-SERVICE_ACCOUNT_JSON = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+TOKEN_JSON = os.getenv("GOOGLE_OAUTH_TOKEN_JSON")
 
-creds_info = json.loads(SERVICE_ACCOUNT_JSON)
+creds_info = json.loads(TOKEN_JSON)
 
-creds = service_account.Credentials.from_service_account_info(
+creds = Credentials.from_authorized_user_info(
     creds_info,
     scopes=["https://www.googleapis.com/auth/drive"]
 )
@@ -39,4 +39,9 @@ def upload_file(local_path, drive_name=None):
 for root, dirs, files in os.walk("SENTIMENT_INDEX"):
     for filename in files:
         local_path = os.path.join(root, filename)
+
+        # กันอัปโหลดไฟล์ระบบที่ไม่จำเป็น
+        if filename.startswith("."):
+            continue
+
         upload_file(local_path)
