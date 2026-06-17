@@ -3,8 +3,8 @@ name: Run BOT FPO and Upload to Drive
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 1 * * *"  # 08:00 ไทย
-    - cron: "0 7 * * *"  # 14:00 ไทย
+    # - cron: "0 1 * * *"  # 08:00 ไทย
+    # - cron: "0 7 * * *"  # 14:00 ไทย
 
 jobs:
   run:
